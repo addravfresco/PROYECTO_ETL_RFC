@@ -3,7 +3,6 @@
 # Rutas de archivos
 INPUT_PATH = "data/Results.csv"
 OUTPUT_PATH = "data/NuevosRFC.csv"
-AUDIT_PATH = "data/Auditoria_Limpieza_Nombres.csv"
 
 # Expresiones Regulares
 RE_LIMPIEZA_RFC = r"[^A-Z0-9&Ñ]"
