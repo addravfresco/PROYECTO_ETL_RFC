@@ -18,7 +18,7 @@ def validar_y_limpiar_rfc(df: pl.DataFrame) -> pl.DataFrame:
         
         # 2. Filtro de Estructura Básica:
         # Debe empezar con 3 o 4 letras (A-Z, &, Ñ) seguidas de al menos un número.
-        # Esto elimina de golpe los "0000000000", "----------" y "XXXXXXXXXXXX"
+        # Esto elimina de golpe los "0000000000"
         .filter(pl.col("RFC_Limpio").str.contains(r"^[A-Z&Ñ]{3,4}[0-9]"))
     )
 
@@ -48,7 +48,7 @@ def aplicar_integridad_negocio(df: pl.DataFrame) -> pl.DataFrame:
             (pl.col("RFC_Limpio").str.len_chars() == 13) & 
             (
                 (pl.col("Razon_Social").str.to_uppercase().str.contains(PATRONES_MORALES)) |
-                (pl.col("Razon_Social").str.contains(r"\.")) # Detecta cualquier punto
+                (pl.col("Razon_Social").str.contains(r"\.")) 
             )
         )
     )

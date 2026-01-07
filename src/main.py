@@ -21,7 +21,7 @@ def main():
         )
 
         # CARGA OPTIMIZADA PARA EXCEL:
-        # 1. Usamos include_bom=True para que Excel detecte acentos y Ñ.
+        # 1. Usar include_bom=True para que Excel detecte acentos y Ñ.
         # 2. Mantenemos el separador por defecto (coma).
         df_final.write_csv(OUTPUT_PATH, include_bom=True, separator=",")
         
