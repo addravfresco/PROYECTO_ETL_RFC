@@ -17,8 +17,6 @@ def validar_y_limpiar_rfc(df: pl.DataFrame) -> pl.DataFrame:
         .filter(pl.col("RFC_Limpio").str.len_chars().is_in([12, 13]))
         
         # 2. Filtro de Estructura Básica:
-        # Debe empezar con 3 o 4 letras (A-Z, &, Ñ) seguidas de al menos un número.
-        # Esto elimina de golpe los "0000000000"
         .filter(pl.col("RFC_Limpio").str.contains(r"^[A-Z&Ñ]{3,4}[0-9]"))
     )
 
@@ -54,13 +52,55 @@ def aplicar_integridad_negocio(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 def normalizar_razon_social(df: pl.DataFrame) -> pl.DataFrame:
-    """Normalización de nombres para reporte en Excel."""
+    """Normalización de nombres: Mayúsculas, sin espacios extra y sin acentos."""
     return df.with_columns(
         pl.col("Razon_Social")
         .cast(pl.Utf8)
         .str.to_uppercase()
+        .str.replace_all("Á", "A")
+        .str.replace_all("É", "E")
+        .str.replace_all("Í", "I")
+        .str.replace_all("Ó", "O")
+        .str.replace_all("Ú", "U")
+        .str.replace_all("Ü", "U")
         .str.replace_all("_", " ")
         .str.replace_all(r"\s+", " ")
         .str.strip_chars()
         .alias("Nombre_Limpio")
+    )
+
+def limpiar_simbolos(df: pl.DataFrame) -> pl.DataFrame:
+    """Limpia puntuación pero respeta el ampersand (&) que es comercial."""
+    return df.with_columns(
+        pl.col("Razon_Social")
+        .str.replace_all(r'[",()\-._]', " ") 
+        .str.replace_all(r"\s+", " ")
+        .str.strip_chars()
+        .alias("Razon_Social")
+    )
+
+from src.globals import REGIMENES_LEGALES
+
+def quitar_regimen_legal(df: pl.DataFrame) -> pl.DataFrame:
+    """Elimina regímenes jurídicos usando la lista centralizada en globals.py"""
+    
+    patron_regimen = "|".join(REGIMENES_LEGALES)
+
+    return df.with_columns(
+        pl.col("Razon_Social")
+        .str.to_uppercase()
+        .str.replace_all(patron_regimen, " ")
+        .str.replace_all(r"\b(SOCIEDAD|RESPONSABILIDAD|LIMITADA|VARIABLE|CAPITAL|ANONIMA|SOFOM)\b", " ")
+        .str.replace_all(r"\s+", " ")
+        .str.strip_chars()
+        .alias("Razon_Social")
+    )
+
+def limpiar_conectores_finales(df: pl.DataFrame) -> pl.DataFrame:
+    """Elimina palabras conectoras que quedan al final tras quitar el régimen."""
+    return df.with_columns(
+        pl.col("Razon_Social")
+        .str.replace(r"\s(DE|DEL|LA|EL|THE|AND)$", "")
+        .str.strip_chars()
+        .alias("Razon_Social")
     )
