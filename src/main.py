@@ -3,7 +3,7 @@ from src.globals import INPUT_PATH, OUTPUT_PATH
 import src.modules as mod
 
 def main():
-    print(" Iniciando ETL (Versión Completa sin deduplicación)...")
+    print(" Iniciando...")
 
     try:
         df = pl.read_csv(INPUT_PATH)
